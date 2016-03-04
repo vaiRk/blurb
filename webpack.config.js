@@ -24,7 +24,11 @@ module.exports = {
 	context: __dirname,
 	debug: process.env.NODE_ENV === 'development',
 	entry: {
-		app: path.join(__dirname, 'src', 'index.js')
+		app: [
+			'webpack-dev-server/client?http://0.0.0.0:8000', // WebpackDevServer host and port
+			'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
+			path.join(__dirname, 'src', 'index.js')
+		]
 	},
 	output: {
 		path: path.join(__dirname, 'build'),
@@ -33,10 +37,11 @@ module.exports = {
 	},
 	module: {
 		loaders: [
-			{ test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel' }
+			{ test: /\.jsx?$/, exclude: /node_modules/, loader: 'react-hot!babel' }
 		]
 	},
 	plugins: [
+		new webpack.HotModuleReplacementPlugin(),
 		new webpack.DefinePlugin({
 		  'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		}),
@@ -46,5 +51,22 @@ module.exports = {
 			module: true
 		}),
 		new webpack.NoErrorsPlugin()
-	].concat(prodPlugins)
+	].concat(prodPlugins),
+	devServer: {
+		port: process.env.PORT || 8000,
+		hot: true,
+		contentBase: path.join(__dirname, 'src'),
+		historyApiFallback: true,
+		quiet: false,
+		noInfo: false,
+		stats: {
+			assets: true,
+			colors: true,
+			version: false,
+			hash: false,
+			timings: true,
+			chunks: false,
+			chunkModules: false
+		}
+	}
 }
